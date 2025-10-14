@@ -13,7 +13,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields is required");
   }
 
-  const existingUser = User.findOne({
+  const existingUser = await User.findOne({
     $or: [{email}, {username}],
   });
 
@@ -37,9 +37,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     fullName,
+    email,
+    password,
     avatar: avatar?.url,
     coverImage: coverImage?.url || "",
-    username: username?.lowerCase(),
+    username: username?.toLowerCase(),
   });
 
   const createdUser = await User.findById(user?.id).select(
@@ -54,11 +56,9 @@ const registerUser = asyncHandler(async (req, res) => {
       );
     }
   } else {
-    return res.status(
-      (201).json(
-        new ApiResponse(200, createdUser, "User Registered Successfully")
-      )
-    );
+    return res
+      .status(201)
+      .json(new ApiResponse(200, createdUser, "User Registered Successfully"));
   }
 });
 
