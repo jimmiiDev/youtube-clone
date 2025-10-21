@@ -62,4 +62,26 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-export {registerUser};
+const loginUser = asyncHandler(async (req, res) => {
+  const {email, username, password} = req.body;
+
+  if (!email || !username) {
+    throw new ApiError(400, "username or email is required");
+  }
+
+  const user = User.findOne({
+    $or: [{username}, {email}],
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  const isPasswordValid = user.isPasswordCorrect(password);
+
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid user credentials");
+  }
+});
+
+export {registerUser, loginUser};
